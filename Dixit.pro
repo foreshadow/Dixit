@@ -16,9 +16,15 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     mainwindow.cpp \
-    card.cpp
+    card.cpp \
+    deck.cpp \
+    tcpserver.cpp \
+    tcpsocket.cpp
 
 HEADERS  += mainwindow.h \
-    card.h
+    card.h \
+    deck.h \
+    tcpserver.h \
+    tcpsocket.h
 
 FORMS    += mainwindow.ui
