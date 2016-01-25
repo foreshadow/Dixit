@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    QSplashScreen splash(QPixmap("splash.png"));
+    QSplashScreen splash(QPixmap("img/splash.png"));
     splash.show();
     int t = clock();
     ui->setupUi(this);
@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         splash.showMessage(QString("Loading cards (%1 / 84)").arg(i + 1),
                            Qt::AlignLeft, Qt::white);
-        Card *c = new Card(i, QString("img/%1.png").arg(i + 1, 2, 10, QChar('0')));
+        Card *c = new Card(i, QString("img/cards/%1.png").arg(i + 1, 2, 10, QChar('0')));
         c->setVisible(false);
         ui->graphicsView->scene()->addItem(c);
         deck.addCard(c);
@@ -35,5 +35,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    deck.clear();
     delete ui;
 }
