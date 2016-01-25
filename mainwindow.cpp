@@ -11,20 +11,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     QSplashScreen splash(QPixmap("splash.png"));
-    int t = clock();
     splash.show();
+    int t = clock();
     ui->setupUi(this);
     ui->graphicsView->setScene(new QGraphicsScene(this));
     ui->graphicsView->setSceneRect(0, 0, 798, 558);
     for (int i = 0; i < 84; i++)
     {
-        QGraphicsItem *item = new Card(i, QString("img/%1.png").arg(i + 1, 2, 10, QChar('0')));
-        item->setPos(i % 14 * 50, i / 14 * 50);
-        item->setVisible(false);
-        ui->graphicsView->scene()->addItem(item);
+        splash.showMessage(QString("Loading cards (%1 / 84)").arg(i + 1),
+                           Qt::AlignLeft, Qt::white);
+        Card *c = new Card(i, QString("img/%1.png").arg(i + 1, 2, 10, QChar('0')));
+        c->setVisible(false);
+        ui->graphicsView->scene()->addItem(c);
+        deck.addCard(c);
     }
     while (clock() - t < 2500)
+    {
+        splash.showMessage(QString("Waiting (%1 / 2500)").arg(clock() - t),
+                           Qt::AlignLeft, Qt::white);
         QCoreApplication::processEvents();
+    }
 }
 
 MainWindow::~MainWindow()
