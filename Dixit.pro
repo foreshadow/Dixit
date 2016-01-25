@@ -4,17 +4,21 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += c++11
 
 TARGET = Dixit
 TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+    mainwindow.cpp \
+    card.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    card.h
 
 FORMS    += mainwindow.ui
