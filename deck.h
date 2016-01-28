@@ -2,6 +2,8 @@
 #define DECK_H
 
 #include <QObject>
+#include <QtCore>
+#include "card.h"
 
 class Deck : public QObject
 {
@@ -9,6 +11,13 @@ class Deck : public QObject
 public:
     explicit Deck(QObject *parent = 0);
     ~Deck();
+
+    void clear();
+    void addCard(Card *card);
+    Card *getCard(int id) const;
+
+protected:
+    QList<Card *> list;
 
 signals:
 

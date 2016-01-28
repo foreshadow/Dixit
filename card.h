@@ -15,9 +15,14 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *);
+    void focusInEvent(QFocusEvent *);
+
+    int getId() const;
 
 protected:
     int id;
+    double z;
+    QPoint p;
     QImage origin;
     QImage abbr;
     QImage *img;

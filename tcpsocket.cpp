@@ -23,12 +23,12 @@ TcpSocket::~TcpSocket()
     socket->deleteLater();
 }
 
-void TcpSocket::connectToHost(const QHostAddress &address, quint16 port, QAbstractSocket::OpenMode mode)
+bool TcpSocket::connectToHost(const QHostAddress &address, quint16 port, QAbstractSocket::OpenMode mode)
 {
     connect(socket, SIGNAL(connected()), this, SIGNAL(connected()));
     connect(socket, SIGNAL(readyRead()), this, SLOT(readMessage()));
     socket->connectToHost(address, port, mode);
-    socket->waitForConnected(3000);
+    return socket->waitForConnected(3000);
 }
 
 QAbstractSocket::SocketState TcpSocket::state() const
@@ -58,7 +58,7 @@ void TcpSocket::setId(const QVariant &id)
     emit nameChanged();
 }
 
-void TcpSocket::send(QString message)
+void TcpSocket::send(QByteArray message)
 {
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);

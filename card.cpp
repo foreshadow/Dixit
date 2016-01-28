@@ -8,7 +8,7 @@ Card::Card(int id, QString path) :
     abbr(origin.scaledToHeight(150)),
     img(&abbr)
 {
-    this->setFlags(ItemIsSelectable | ItemIsFocusable);
+    this->setFlags(ItemIsSelectable);
     this->setAcceptHoverEvents(true);
 }
 
@@ -44,12 +44,29 @@ void Card::mousePressEvent(QGraphicsSceneMouseEvent *event)
         event->ignore();
         return;
     }
+    z = zValue();
+    setZValue(1000);
+    p = pos().toPoint();
+    this->moveBy((abbr.width() - origin.width()) / 2,
+                 abbr.height() - origin.height());
     img = &origin;
     update();
 }
 
 void Card::mouseReleaseEvent(QGraphicsSceneMouseEvent *)
 {
+    setZValue(z);
     img = &abbr;
+    setPos(p);
     update();
+}
+
+void Card::focusInEvent(QFocusEvent *)
+{
+
+}
+
+int Card::getId() const
+{
+    return id;
 }

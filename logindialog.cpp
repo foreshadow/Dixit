@@ -1,7 +1,9 @@
 #include "logindialog.h"
 #include "ui_logindialog.h"
 
-LoginDialog::LoginDialog(TcpSocket *socket, QString *id) :
+#include "clientdata.h"
+
+LoginDialog::LoginDialog(TcpSocket *socket, QString &id) :
     ui(new Ui::LoginDialog),
     socket(socket),
     id(id)
@@ -50,8 +52,7 @@ void LoginDialog::on_pushButtonEnter_clicked()
         repaint();
         if (socket->connectToHost(QHostAddress(host), port))
         {
-            *id = username;
-            socket->send("/ID " + *id);
+            id = username;
             accept();
         }
         else

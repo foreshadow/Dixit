@@ -18,13 +18,27 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     card.cpp \
     deck.cpp \
-    tcpserver.cpp \
-    tcpsocket.cpp
+    tcpsocket.cpp \
+    logindialog.cpp \
+    chatform.cpp \
+    player.cpp \
+    handcards.cpp \
+    serverdata.cpp \
+    clientdata.cpp \
+    graphicsbutton.cpp
 
 HEADERS  += mainwindow.h \
     card.h \
     deck.h \
-    tcpserver.h \
-    tcpsocket.h
+    tcpsocket.h \
+    logindialog.h \
+    chatform.h \
+    player.h \
+    handcards.h \
+    serverdata.h \
+    clientdata.h \
+    graphicsbutton.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    logindialog.ui \
+    chatform.ui
