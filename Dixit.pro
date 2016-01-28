@@ -13,32 +13,39 @@ CONFIG += c++11
 TARGET = Dixit
 TEMPLATE = app
 
+INCLUDEPATH += \
+    src/core \
+    src/network \
+    src/ui
 
-SOURCES += main.cpp\
-    mainwindow.cpp \
-    card.cpp \
-    deck.cpp \
-    tcpsocket.cpp \
-    logindialog.cpp \
-    chatform.cpp \
-    player.cpp \
-    handcards.cpp \
-    serverdata.cpp \
-    clientdata.cpp \
-    graphicsbutton.cpp
+SOURCES += \
+    src/core/card.cpp \
+    src/core/deck.cpp \
+    src/core/handcards.cpp \
+    src/core/player.cpp \
+    src/graphics/graphicsbutton.cpp \
+    src/network/clientdata.cpp \
+    src/network/serverdata.cpp \
+    src/network/tcpsocket.cpp \
+    src/ui/chatform.cpp \
+    src/ui/logindialog.cpp \
+    src/ui/mainwindow.cpp \
+    src/main.cpp
 
-HEADERS  += mainwindow.h \
-    card.h \
-    deck.h \
-    tcpsocket.h \
-    logindialog.h \
-    chatform.h \
-    player.h \
-    handcards.h \
-    serverdata.h \
-    clientdata.h \
-    graphicsbutton.h
+HEADERS  += \
+    src/core/card.h \
+    src/core/deck.h \
+    src/core/handcards.h \
+    src/core/player.h \
+    src/graphics/graphicsbutton.h \
+    src/network/clientdata.h \
+    src/network/serverdata.h \
+    src/network/tcpsocket.h \
+    src/ui/chatform.h \
+    src/ui/logindialog.h \
+    src/ui/mainwindow.h
 
-FORMS    += mainwindow.ui \
-    logindialog.ui \
-    chatform.ui
+FORMS    += \
+    src/ui/chatform.ui \
+    src/ui/logindialog.ui \
+    src/ui/mainwindow.ui
