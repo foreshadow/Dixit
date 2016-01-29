@@ -32,7 +32,8 @@ SOURCES += \
     src/ui/logindialog.cpp \
     src/ui/mainwindow.cpp \
     src/main.cpp \
-    graphicsheadline.cpp
+    graphicsheadline.cpp \
+    src/graphics/graphicsheadline.cpp
 
 HEADERS  += \
     src/core/card.h \
@@ -46,7 +47,8 @@ HEADERS  += \
     src/ui/chatform.h \
     src/ui/logindialog.h \
     src/ui/mainwindow.h \
-    graphicsheadline.h
+    graphicsheadline.h \
+    src/graphics/graphicsheadline.h
 
 FORMS    += \
     src/ui/chatform.ui \
