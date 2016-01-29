@@ -12,6 +12,8 @@ HandCards::~HandCards()
 
 void HandCards::addCard(Card *card)
 {
+    if (card == nullptr)
+        return;
     list << card;
     reposition();
     card->show();
@@ -30,7 +32,8 @@ void HandCards::reposition()
     for (int i = 0; i < list.size(); i++)
     {
         list[i]->setZValue(100 + i);
-        list[i]->setPos(x += 100, y);
+        list[i]->setPos(x += 100, y);\
+        list[i]->recordPosition();
     }
 }
 
