@@ -15,6 +15,7 @@ TEMPLATE = app
 
 INCLUDEPATH += \
     src/core \
+    src/graphics \
     src/network \
     src/ui
 

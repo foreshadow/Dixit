@@ -10,6 +10,7 @@
 #include "handcards.h"
 #include "clientdata.h"
 #include "serverdata.h"
+#include "graphicsbutton.h"
 
 namespace Ui {
 class MainWindow;
@@ -36,12 +37,15 @@ protected:
     QList<QGraphicsPixmapItem *> rabbits;
     QList<Player *> players;
 
+    GraphicsButton *gbReady;
+
 signals:
     void chatFormAppend(QString);
 
 public slots:
     void received(QByteArray message);
     void chatFormSend(QString message);
+    void onGBReadyClicked();
 };
 
 #endif // MAINWINDOW_H

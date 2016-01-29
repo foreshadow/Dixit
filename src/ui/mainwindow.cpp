@@ -2,16 +2,14 @@
 #include "ui_mainwindow.h"
 
 #include "chatform.h"
-#include <QtGui>
 #include <QSplashScreen>
 #include "clientdata.h"
 #include "serverdata.h"
 #include "card.h"
 
 MainWindow::MainWindow(TcpSocket *socket, QString id) :
-    ui(new Ui::MainWindow),
-    socket(socket),
-    myId(id)
+    ui(new Ui::MainWindow), socket(socket), myId(id), rabbits(), players(),
+    gbReady(new GraphicsButton)
 {
     connect(socket, SIGNAL(received(QByteArray)), this, SLOT(received(QByteArray)));
     QSplashScreen splash(QPixmap("img/splash.png"));
@@ -55,6 +53,10 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
     splash.showMessage("正在说你好", Qt::AlignLeft, Qt::white);
     sendClientData(ClientData(ClientData::SET_ID, myId, myId));
     sendClientData(ClientData(ClientData::CHAT, myId, myId + "加入了房间。"));
+    connect(gbReady, SIGNAL(clicked()), this, SLOT(onGBReadyClicked()));
+    gbReady->load("img/start.png");
+    gbReady->setPos(400, 400);
+    ui->graphicsView->scene()->addItem(gbReady);
 }
 
 MainWindow::~MainWindow()
@@ -115,4 +117,9 @@ void MainWindow::sendClientData(ClientData cd)
 void MainWindow::chatFormSend(QString message)
 {
     sendClientData(ClientData(ClientData::CHAT, myId, message));
+}
+
+void MainWindow::onGBReadyClicked()
+{
+    sendClientData(ClientData(ClientData::READY, myId, myId));
 }
