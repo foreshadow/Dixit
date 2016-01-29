@@ -5,25 +5,28 @@
 #include <QPainter>
 #include <QObject>
 
-class GraphicsButton : public QObject,
-                       public QGraphicsItem
+class GraphicsButton : public QObject, public QGraphicsItem
 {
     Q_OBJECT
     Q_INTERFACES(QGraphicsItem)
 
 public:
-    explicit GraphicsButton();
-    explicit GraphicsButton(QString path);
+    explicit GraphicsButton(const QString &path = QString());
     ~GraphicsButton();
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *);
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *);
+    void mousePressEvent(QGraphicsSceneMouseEvent *);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *);
 
-    void load(QString path);
+    void setImage(QString path);
 
 protected:
     QImage image;
+    bool hover;
+    bool mouseDown;
 
 signals:
     void clicked();

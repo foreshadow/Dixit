@@ -28,7 +28,7 @@ void LoginDialog::echo(QString message)
 {
     ui->labelEcho->setText(ui->labelEcho->text() + message + "\n");
     QStringList slist = ui->labelEcho->text().split("\n");
-    while (slist.size() >= 6)
+    while (slist.size() >= 8)
         slist.erase(slist.begin());
     ui->labelEcho->setText(slist.join("\n"));
 }

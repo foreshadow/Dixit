@@ -11,6 +11,7 @@
 #include "clientdata.h"
 #include "serverdata.h"
 #include "graphicsbutton.h"
+#include "graphicsheadline.h"
 
 namespace Ui {
 class MainWindow;
@@ -38,6 +39,7 @@ protected:
     QList<Player *> players;
 
     GraphicsButton *gbReady;
+    GraphicsHeadline *headline;
 
 signals:
     void chatFormAppend(QString);

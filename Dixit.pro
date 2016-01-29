@@ -31,7 +31,8 @@ SOURCES += \
     src/ui/chatform.cpp \
     src/ui/logindialog.cpp \
     src/ui/mainwindow.cpp \
-    src/main.cpp
+    src/main.cpp \
+    graphicsheadline.cpp
 
 HEADERS  += \
     src/core/card.h \
@@ -44,7 +45,8 @@ HEADERS  += \
     src/network/tcpsocket.h \
     src/ui/chatform.h \
     src/ui/logindialog.h \
-    src/ui/mainwindow.h
+    src/ui/mainwindow.h \
+    graphicsheadline.h
 
 FORMS    += \
     src/ui/chatform.ui \

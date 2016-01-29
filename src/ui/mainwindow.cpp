@@ -9,7 +9,7 @@
 
 MainWindow::MainWindow(TcpSocket *socket, QString id) :
     ui(new Ui::MainWindow), socket(socket), myId(id), rabbits(), players(),
-    gbReady(new GraphicsButton)
+    gbReady(new GraphicsButton), headline(new GraphicsHeadline)
 {
     connect(socket, SIGNAL(received(QByteArray)), this, SLOT(received(QByteArray)));
     QSplashScreen splash(QPixmap("img/splash.png"));
@@ -54,9 +54,13 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
     sendClientData(ClientData(ClientData::SET_ID, myId, myId));
     sendClientData(ClientData(ClientData::CHAT, myId, myId + "加入了房间。"));
     connect(gbReady, SIGNAL(clicked()), this, SLOT(onGBReadyClicked()));
-    gbReady->load("img/start.png");
-    gbReady->setPos(400, 400);
+    gbReady->setImage("img/start.png");
+    gbReady->setPos(600, 500);
     ui->graphicsView->scene()->addItem(gbReady);
+    headline->setImage("img/banner.png");
+    headline->setPos(180, 120);
+    headline->setText("欢迎！");
+    ui->graphicsView->scene()->addItem(headline);
 }
 
 MainWindow::~MainWindow()
@@ -79,6 +83,8 @@ void MainWindow::handle(ServerData sd)
     case ServerData::REQUEST_ID:
         break;
     case ServerData::READY:
+        if (sd.getFromUser() == myId)
+            gbReady->hide();
         rabbits.at(players.size())->show();
         players.append(new Player(sd.getFromUser(), nullptr));
         emit chatFormAppend(sd.getFromUser() + "准备就绪。");
