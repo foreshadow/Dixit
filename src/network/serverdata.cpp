@@ -7,7 +7,8 @@ ServerData::ServerData(QDataStream &&ds)
 
 ServerData::ServerData(ServerData::Type t, const QString &fromUser,
                        const QString &content, const QList<int> &cards) :
-    type(t), fromUser(fromUser), content(content), cards(cards), utc(QDateTime::currentDateTimeUtc())
+    type(t), fromUser(fromUser), content(content), cards(cards),
+    utc(QDateTime::currentDateTimeUtc())
 {
 
 }

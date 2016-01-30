@@ -56,9 +56,9 @@ void Card::mousePressEvent(QGraphicsSceneMouseEvent *)
 
 void Card::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (QLineF(event->screenPos(), event->buttonDownScreenPos(Qt::LeftButton)).length()
-            < QApplication::startDragDistance())
-        return;
+//    if (QLineF(event->screenPos(), event->buttonDownScreenPos(Qt::LeftButton)).length()
+//            < QApplication::startDragDistance())
+//        return;
     QDrag *drag = new QDrag(event->widget());
     drag->setMimeData(new QMimeData);
     QPixmap pix(origin.size());
@@ -69,7 +69,10 @@ void Card::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     hide();
     drag->exec();
     show();
-    hoverLeaveEvent(nullptr); // warning
+    setZValue(z);
+    img = &abbr;
+    setPos(p);
+    update();
 }
 
 void Card::mouseReleaseEvent(QGraphicsSceneMouseEvent *)

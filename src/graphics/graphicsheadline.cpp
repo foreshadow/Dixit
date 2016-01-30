@@ -33,9 +33,8 @@ QString GraphicsHeadline::getText() const
 
 void GraphicsHeadline::setText(const QString &value)
 {
-    int width = value.size() * textItem->font().pointSize();
-    int height = textItem->font().pointSize() * 2;
-    textItem->setPos((image.width() - width) / 2, (image.height() - height) / 2);
+    textItem->setPos((image.width() - textItem->boundingRect().width()) / 2,
+                     (image.height() - textItem->boundingRect().height()) / 2);
     textItem->setPlainText(value);
     update();
 }

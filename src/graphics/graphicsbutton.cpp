@@ -46,16 +46,27 @@ void GraphicsButton::hoverLeaveEvent(QGraphicsSceneHoverEvent *)
     update();
 }
 
-void GraphicsButton::mousePressEvent(QGraphicsSceneMouseEvent *)
+void GraphicsButton::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    if (event->button() != Qt::LeftButton)
+    {
+        event->ignore();
+        return;
+    }
     mouseDown = true;
     update();
 }
 
-void GraphicsButton::mouseReleaseEvent(QGraphicsSceneMouseEvent *)
+void GraphicsButton::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
+    if (event->button() != Qt::LeftButton)
+    {
+        event->ignore();
+        return;
+    }
     mouseDown = false;
-    emit clicked();
+    if (isUnderMouse())
+        emit clicked();
     update();
 }
 

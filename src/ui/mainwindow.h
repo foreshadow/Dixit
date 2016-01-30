@@ -27,6 +27,7 @@ public:
     void handle(ServerData cd);
 
     void sendClientData(ClientData cd);
+    void sync(ServerData sd);
 private:
     Ui::MainWindow *ui;
     TcpSocket *socket;

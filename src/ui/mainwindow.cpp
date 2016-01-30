@@ -3,6 +3,7 @@
 
 #include "chatform.h"
 #include <QSplashScreen>
+#include <QInputDialog>
 #include "clientdata.h"
 #include "serverdata.h"
 #include "card.h"
@@ -47,9 +48,8 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
     connect(cf, SIGNAL(send(QString)), this, SLOT(chatFormSend(QString)));
     connect(this, SIGNAL(chatFormAppend(QString)), cf, SLOT(append(QString)));
     cf->setFeatures(QDockWidget::DockWidgetFloatable);
-    cf->setFloating(true);
     QPoint mtg = mapToGlobal(this->geometry().topLeft());
-    cf->setGeometry(mtg.x() + this->width() + 16, mtg.y(), cf->width(), cf->height());
+    cf->setGeometry(mtg.x() + this->width() - cf->width(), mtg.y(), cf->width(), cf->height());
     splash.showMessage("正在说你好", Qt::AlignLeft, Qt::white);
     sendClientData(ClientData(ClientData::SET_ID, myId, myId));
     sendClientData(ClientData(ClientData::CHAT, myId, myId + "加入了房间。"));
@@ -69,6 +69,19 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::sync(ServerData sd)
+{
+    if (sd.getContent() == "DESC" && sd.getFromUser() == myId)
+    {
+        bool ok = false;
+        QString input;
+        while (ok == false || input.isEmpty())
+            input = QInputDialog::getText(this, "描述一张卡牌...", "你的描述",
+                                          QLineEdit::Normal, "", &ok);
+        sendClientData(ClientData(ClientData::DESC, myId, input));
+    }
+}
+
 void MainWindow::handle(ServerData sd)
 {
     switch (sd.getType())
@@ -83,14 +96,16 @@ void MainWindow::handle(ServerData sd)
     case ServerData::REQUEST_ID:
         break;
     case ServerData::READY:
-        if (sd.getFromUser() == myId)
-            gbReady->hide();
+//        if (sd.getFromUser() == myId)
+//            gbReady->hide();
         rabbits.at(players.size())->show();
         players.append(new Player(sd.getFromUser(), nullptr));
         emit chatFormAppend(sd.getFromUser() + "准备就绪。");
         break;
     case ServerData::DESC:
-        emit chatFormAppend(QString("%1的描述为%2。").arg(sd.getFromUser()).arg(sd.getContent()));
+        emit chatFormAppend(QString("%1的描述为\n  %2").arg(sd.getFromUser()).arg(sd.getContent()));
+        headline->setText(sd.getContent());
+        update();
         break;
     case ServerData::PLAY:
         break;
@@ -102,6 +117,7 @@ void MainWindow::handle(ServerData sd)
         update();
         break;
     case ServerData::SYNC:
+        sync(sd);
         break;
     }
 }

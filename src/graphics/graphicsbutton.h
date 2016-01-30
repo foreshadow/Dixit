@@ -1,6 +1,7 @@
 #ifndef GRAPHICSBUTTON_H
 #define GRAPHICSBUTTON_H
 
+#include <QGraphicsSceneMouseEvent>
 #include <QGraphicsItem>
 #include <QPainter>
 #include <QObject>
@@ -18,8 +19,8 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *);
     void hoverEnterEvent(QGraphicsSceneHoverEvent *);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *);
-    void mousePressEvent(QGraphicsSceneMouseEvent *);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *);
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
     void setImage(QString path);
 
