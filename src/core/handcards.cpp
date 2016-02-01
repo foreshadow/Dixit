@@ -14,15 +14,23 @@ void HandCards::addCard(Card *card)
 {
     if (card == nullptr)
         return;
+    card->setLocation(Card::Location::HAND_DRAGGABLE);
     list << card;
     reposition();
     card->show();
 }
 
-void HandCards::discard(Card *card)
+Card *HandCards::takeCard(int id)
 {
-    list.removeOne(card);
-    reposition();
+    for (Card *c : list)
+        if (c->getId() == id)
+        {
+            list.removeOne(c);
+            c->setLocation(Card::Location::DECK_INVISIBLE);
+            reposition();
+            return c;
+        }
+    return nullptr;
 }
 
 void HandCards::reposition()

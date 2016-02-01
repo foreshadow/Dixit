@@ -22,7 +22,19 @@ public:
     void recordPosition();
     int getId() const;
 
+    enum class Location
+    {
+        DECK_INVISIBLE,
+        HAND_DRAGGABLE,
+        HAND_INDRAGGABLE,
+        CENTER_SELECTABLE
+    };
+
+    Location getLocation() const;
+    void setLocation(const Location &value);
+
 protected:
+    Location loc;
     int id;
     double z;
     QPoint p;

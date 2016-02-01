@@ -10,7 +10,7 @@
 
 MainWindow::MainWindow(TcpSocket *socket, QString id) :
     ui(new Ui::MainWindow), socket(socket), myId(id), rabbits(), players(),
-    gbReady(new GraphicsButton), headline(new GraphicsHeadline)
+    ca(new CenterArea(500, 200)), gbReady(new GraphicsButton), headline(new GraphicsHeadline)
 {
     connect(socket, SIGNAL(received(QByteArray)), this, SLOT(received(QByteArray)));
     QSplashScreen splash(QPixmap("img/splash.png"));
@@ -61,6 +61,9 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
     headline->setPos(180, 120);
     headline->setText("欢迎！");
     ui->graphicsView->scene()->addItem(headline);
+    connect(ca, SIGNAL(cardDrop(int)), this, SLOT(playCard(int)));
+    ca->setPos(150, 175);
+    ui->graphicsView->scene()->addItem(ca);
 }
 
 MainWindow::~MainWindow()
@@ -108,6 +111,10 @@ void MainWindow::handle(ServerData sd)
         update();
         break;
     case ServerData::PLAY:
+        if (sd.getFromUser() == myId)
+            ca->addCard(hcards.takeCard(sd.getCards().first()));
+        else
+            ca->addCard(deck.getCard(sd.getCards().first()));
         break;
     case ServerData::SELECT:
         break;
@@ -144,4 +151,10 @@ void MainWindow::chatFormSend(QString message)
 void MainWindow::onGBReadyClicked()
 {
     sendClientData(ClientData(ClientData::READY, myId, myId));
+}
+
+void MainWindow::playCard(int id)
+{
+    if (deck.getCard(id)->getLocation() == Card::Location::HAND_DRAGGABLE)
+        sendClientData(ClientData(ClientData::PLAY, myId, "", QList<int>({id})));
 }

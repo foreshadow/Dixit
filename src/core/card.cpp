@@ -8,6 +8,7 @@
 #include <QWidget>
 
 Card::Card(int id, QString path) :
+    loc(Location::DECK_INVISIBLE),
     id(id),
     origin(QImage(path)),
     abbr(origin.scaledToHeight(150)),
@@ -56,11 +57,14 @@ void Card::mousePressEvent(QGraphicsSceneMouseEvent *)
 
 void Card::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
+    if (getLocation() != Location::HAND_DRAGGABLE)
+        return;
 //    if (QLineF(event->screenPos(), event->buttonDownScreenPos(Qt::LeftButton)).length()
 //            < QApplication::startDragDistance())
 //        return;
     QDrag *drag = new QDrag(event->widget());
     drag->setMimeData(new QMimeData);
+    drag->mimeData()->setText(QString::number(getId()));
     QPixmap pix(origin.size());
     QPainter painter(&pix);
     paint(&painter, 0, 0);
@@ -113,3 +117,14 @@ int Card::getId() const
 {
     return id;
 }
+
+Card::Location Card::getLocation() const
+{
+    return loc;
+}
+
+void Card::setLocation(const Location &value)
+{
+    loc = value;
+}
+

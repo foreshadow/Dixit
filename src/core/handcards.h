@@ -12,7 +12,7 @@ public:
     ~HandCards();
 
     void addCard(Card *card);
-    void discard(Card *card);
+    Card *takeCard(int id);
 
 private:
     void reposition();

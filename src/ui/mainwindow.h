@@ -8,6 +8,7 @@
 #include "player.h"
 #include "deck.h"
 #include "handcards.h"
+#include "centerarea.h"
 #include "clientdata.h"
 #include "serverdata.h"
 #include "graphicsbutton.h"
@@ -39,6 +40,7 @@ protected:
     QList<QGraphicsPixmapItem *> rabbits;
     QList<Player *> players;
 
+    CenterArea *ca;
     GraphicsButton *gbReady;
     GraphicsHeadline *headline;
 
@@ -49,6 +51,7 @@ public slots:
     void received(QByteArray message);
     void chatFormSend(QString message);
     void onGBReadyClicked();
+    void playCard(int id);
 };
 
 #endif // MAINWINDOW_H
