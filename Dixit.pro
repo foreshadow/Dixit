@@ -33,7 +33,6 @@ SOURCES += \
     src/ui/chatform.cpp \
     src/ui/logindialog.cpp \
     src/ui/mainwindow.cpp \
-    centerarea.cpp \
     src/core/centerarea.cpp
 
 HEADERS  += \
@@ -49,7 +48,6 @@ HEADERS  += \
     src/ui/chatform.h \
     src/ui/logindialog.h \
     src/ui/mainwindow.h \
-    centerarea.h \
     src/core/centerarea.h
 
 FORMS    += \

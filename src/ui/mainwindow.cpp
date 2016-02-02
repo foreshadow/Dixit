@@ -51,8 +51,8 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
     QPoint mtg = mapToGlobal(this->geometry().topLeft());
     cf->setGeometry(mtg.x() + this->width() - cf->width(), mtg.y(), cf->width(), cf->height());
     splash.showMessage("正在说你好", Qt::AlignLeft, Qt::white);
-    sendClientData(ClientData(ClientData::SET_ID, myId, myId));
-    sendClientData(ClientData(ClientData::CHAT, myId, myId + "加入了房间。"));
+    sendClientData(ClientData(ClientData::Type::SET_ID, myId, myId));
+    sendClientData(ClientData(ClientData::Type::CHAT, myId, myId + "加入了房间。"));
     connect(gbReady, SIGNAL(clicked()), this, SLOT(onGBReadyClicked()));
     gbReady->setImage("img/start.png");
     gbReady->setPos(600, 500);
@@ -81,7 +81,7 @@ void MainWindow::sync(ServerData sd)
         while (ok == false || input.isEmpty())
             input = QInputDialog::getText(this, "描述一张卡牌...", "你的描述",
                                           QLineEdit::Normal, "", &ok);
-        sendClientData(ClientData(ClientData::DESC, myId, input));
+        sendClientData(ClientData(ClientData::Type::DESC, myId, input));
     }
 }
 
@@ -89,41 +89,41 @@ void MainWindow::handle(ServerData sd)
 {
     switch (sd.getType())
     {
-    case ServerData::CHAT:
-    case ServerData::PHRASE:
+    case ServerData::Type::CHAT:
+    case ServerData::Type::PHRASE:
         emit chatFormAppend(QString("%1 %2\n  %3")
                             .arg(sd.getFromUser())
                             .arg(sd.getUtc().toLocalTime().toString("hh:mm:ss"))
                             .arg(sd.getContent()));
         break;
-    case ServerData::REQUEST_ID:
+    case ServerData::Type::REQUEST_ID:
         break;
-    case ServerData::READY:
+    case ServerData::Type::READY:
 //        if (sd.getFromUser() == myId)
 //            gbReady->hide();
         rabbits.at(players.size())->show();
         players.append(new Player(sd.getFromUser(), nullptr));
         emit chatFormAppend(sd.getFromUser() + "准备就绪。");
         break;
-    case ServerData::DESC:
+    case ServerData::Type::DESC:
         emit chatFormAppend(QString("%1的描述为\n  %2").arg(sd.getFromUser()).arg(sd.getContent()));
         headline->setText(sd.getContent());
         update();
         break;
-    case ServerData::PLAY:
+    case ServerData::Type::PLAY:
         if (sd.getFromUser() == myId)
             ca->addCard(hcards.takeCard(sd.getCards().first()));
         else
             ca->addCard(deck.getCard(sd.getCards().first()));
         break;
-    case ServerData::SELECT:
+    case ServerData::Type::SELECT:
         break;
-    case ServerData::DRAW:
+    case ServerData::Type::DRAW:
         for (int i = 0; i < sd.getCards().size(); i++)
             hcards.addCard(deck.getCard(sd.getCards().at(i)));
         update();
         break;
-    case ServerData::SYNC:
+    case ServerData::Type::SYNC:
         sync(sd);
         break;
     }
@@ -145,16 +145,16 @@ void MainWindow::sendClientData(ClientData cd)
 
 void MainWindow::chatFormSend(QString message)
 {
-    sendClientData(ClientData(ClientData::CHAT, myId, message));
+    sendClientData(ClientData(ClientData::Type::CHAT, myId, message));
 }
 
 void MainWindow::onGBReadyClicked()
 {
-    sendClientData(ClientData(ClientData::READY, myId, myId));
+    sendClientData(ClientData(ClientData::Type::READY, myId, myId));
 }
 
 void MainWindow::playCard(int id)
 {
     if (deck.getCard(id)->getLocation() == Card::Location::HAND_DRAGGABLE)
-        sendClientData(ClientData(ClientData::PLAY, myId, "", QList<int>({id})));
+        sendClientData(ClientData(ClientData::Type::PLAY, myId, "", QList<int>({id})));
 }

@@ -6,7 +6,7 @@
 class ClientData
 {
 public:
-    enum Type
+    enum class Type
     {
         CHAT,
         PHRASE,
@@ -21,9 +21,11 @@ public:
     ClientData(QDataStream &&ds);
     ClientData(Type t, QString fromUser = QString(), QString content = QString(),
                QList<int> cards = QList<int>());
+    ClientData(Type t, QString fromUser, int card);
     ~ClientData();
 
-    int getType() const;
+    QVariant getData(const QString &key) const;
+    Type getType() const;
     QString getFromUser() const;
     QString getContent() const;
     QList<int> getCards() const;
@@ -33,11 +35,9 @@ public:
 
 
 protected:
-    int type;
-    QString fromUser;
-    QString content;
-    QList<int> cards;
-    QDateTime utc;
+    QMap<QString, QVariant> m;
 };
+
+Q_DECLARE_METATYPE(ClientData::Type)
 
 #endif // CLIENTDATA_H

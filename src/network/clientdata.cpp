@@ -2,13 +2,24 @@
 
 ClientData::ClientData(QDataStream &&ds)
 {
-    ds >> type >> fromUser >> content >> cards >> utc;
+    ds >> m;
 }
 
-ClientData::ClientData(ClientData::Type t, QString fromUser, QString content, QList<int> cards) :
-    type(t), fromUser(fromUser), content(content), cards(cards), utc(QDateTime::currentDateTimeUtc())
+ClientData::ClientData(ClientData::Type t, QString fromUser, QString content, QList<int> cards)
 {
+    m["type"] = QVariant::fromValue(t);
+    m["fromUser"] = fromUser;
+    m["content"] = content;
+    m["cards"] = QVariant::fromValue(cards);
+    m["utc"] = QDateTime::currentDateTimeUtc();
+}
 
+ClientData::ClientData(ClientData::Type t, QString fromUser, int card)
+{
+    m["type"] = QVariant::fromValue(t);
+    m["fromUser"] = fromUser;
+    m["cards"] = QVariant::fromValue(QList<int>({card}));
+    m["utc"] = QDateTime::currentDateTimeUtc();
 }
 
 ClientData::~ClientData()
@@ -16,35 +27,40 @@ ClientData::~ClientData()
 
 }
 
-int ClientData::getType() const
+QVariant ClientData::getData(const QString &key) const
 {
-    return type;
+    return m[key];
+}
+
+ClientData::Type ClientData::getType() const
+{
+    return m["type"].value<ClientData::Type>();
 }
 
 QString ClientData::getFromUser() const
 {
-    return fromUser;
+    return m["fromUser"].toString();
 }
 
 QString ClientData::getContent() const
 {
-    return content;
+    return m["content"].toString();
 }
 
 QList<int> ClientData::getCards() const
 {
-    return cards;
+    return m["cards"].value<QList<int>>();
 }
 
 QDateTime ClientData::getUtc() const
 {
-    return utc;
+    return m["utc"].toDateTime();
 }
 
 
 QDataStream &operator <<(QDataStream &ds, const ClientData &cd)
 {
-    return ds << cd.type << cd.fromUser << cd.content << cd.cards << cd.utc;
+    return ds << cd.m;
 }
 
 

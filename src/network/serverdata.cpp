@@ -2,47 +2,71 @@
 
 ServerData::ServerData(QDataStream &&ds)
 {
-    ds >> type >> fromUser >> content >> cards >> utc;
+    ds >> m;
 }
 
 ServerData::ServerData(ServerData::Type t, const QString &fromUser,
-                       const QString &content, const QList<int> &cards) :
-    type(t), fromUser(fromUser), content(content), cards(cards),
-    utc(QDateTime::currentDateTimeUtc())
+                       const QString &content, const QList<int> &cards)
 {
+    m["type"] = QVariant::fromValue(t);
+    m["fromUser"] = fromUser;
+    m["content"] = content;
+    m["cards"] = QVariant::fromValue(cards);
+    m["utc"] = QDateTime::currentDateTimeUtc();
+}
 
+ServerData::ServerData(ServerData::Type t, const QList<int> &cards)
+{
+    m["type"] = QVariant::fromValue(t);
+    m["cards"] = QVariant::fromValue(cards);
+    m["utc"] = QDateTime::currentDateTimeUtc();
+}
+
+ServerData::ServerData(ServerData::Type t, const QString &fromUser, int card)
+{
+    m["type"] = QVariant::fromValue(t);
+    m["fromUser"] = fromUser;
+    m["cards"] = QVariant::fromValue(QList<int>({card}));
+    m["utc"] = QDateTime::currentDateTimeUtc();
 }
 
 ServerData::~ServerData()
 {
 
 }
-int ServerData::getType() const
+
+QVariant ServerData::getData(const QString &key) const
 {
-    return type;
+    return m[key];
+}
+
+ServerData::Type ServerData::getType() const
+{
+    return m["type"].value<ServerData::Type>();
 }
 
 QString ServerData::getFromUser() const
 {
-    return fromUser;
+    return m["fromUser"].toString();
 }
 
 QString ServerData::getContent() const
 {
-    return content;
+    return m["content"].toString();
 }
 
-const QList<int> &ServerData::getCards() const
+QList<int> ServerData::getCards() const
 {
-    return cards;
+    return m["cards"].value<QList<int>>();
 }
+
 QDateTime ServerData::getUtc() const
 {
-    return utc;
+    return m["utc"].toDateTime();
 }
 
 QDataStream &operator <<(QDataStream &ds, const ServerData &sd)
 {
-    return ds << sd.type << sd.fromUser << sd.content << sd.cards << sd.utc;
+    return ds << sd.m;
 }
 

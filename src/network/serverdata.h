@@ -6,7 +6,7 @@
 class ServerData
 {
 public:
-    enum Type
+    enum class Type
     {
         CHAT,
         PHRASE,
@@ -22,22 +22,23 @@ public:
     ServerData(QDataStream &&ds);
     ServerData(Type t, const QString &fromUser = QString(), const QString &content = QString(),
                const QList<int> &cards = QList<int>());
+    ServerData(Type t, const QList<int> &cards);
+    ServerData(Type t, const QString &fromUser, int card);
     ~ServerData();
 
-    int getType() const;
+    QVariant getData(const QString &key) const;
+    Type getType() const;
     QString getFromUser() const;
     QString getContent() const;
-    const QList<int> &getCards() const;
+    QList<int> getCards() const;
     QDateTime getUtc() const;
 
     friend QDataStream &operator <<(QDataStream &ds, const ServerData &sd);
 
 protected:
-    int type;
-    QString fromUser;
-    QString content;
-    QList<int> cards;
-    QDateTime utc;
+    QMap<QString, QVariant> m;
 };
+
+Q_DECLARE_METATYPE(ServerData::Type)
 
 #endif // SERVERDATA_H
