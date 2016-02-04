@@ -8,6 +8,16 @@ class Player //: public QObject
 {
 //    Q_OBJECT
 public:
+    enum class Color
+    {
+        Black,
+        Blue,
+        Green,
+        White,
+        Yellow,
+        Pink
+    };
+
     Player();
     Player(QString id, TcpSocket *socket);
     ~Player();
@@ -46,8 +56,12 @@ public:
     int getSelected() const;
     void setSelected(bool value = 0);
 
+    Color getColor() const;
+    void setColor(const Color &value);
+
 protected:
     int seat;
+    Color color;
     QString id;
     bool ready;
     int score;

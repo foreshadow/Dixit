@@ -7,18 +7,23 @@ ClientData::ClientData(QDataStream &&ds)
 
 ClientData::ClientData(ClientData::Type t, QString fromUser, QString content, QList<int> cards)
 {
-    m["type"] = QVariant::fromValue(t);
+    m["type"] = int(t);
     m["fromUser"] = fromUser;
     m["content"] = content;
-    m["cards"] = QVariant::fromValue(cards);
+    QVariantList list;
+    for (int c : cards)
+        list << c;
+    m["cards"] = list;
     m["utc"] = QDateTime::currentDateTimeUtc();
 }
 
 ClientData::ClientData(ClientData::Type t, QString fromUser, int card)
 {
-    m["type"] = QVariant::fromValue(t);
+    m["type"] = int(t);
     m["fromUser"] = fromUser;
-    m["cards"] = QVariant::fromValue(QList<int>({card}));
+    QVariantList list;
+    list << card;
+    m["cards"] = list;
     m["utc"] = QDateTime::currentDateTimeUtc();
 }
 
@@ -34,7 +39,7 @@ QVariant ClientData::getData(const QString &key) const
 
 ClientData::Type ClientData::getType() const
 {
-    return m["type"].value<ClientData::Type>();
+    return ClientData::Type(m["type"].toInt());
 }
 
 QString ClientData::getFromUser() const
@@ -49,7 +54,11 @@ QString ClientData::getContent() const
 
 QList<int> ClientData::getCards() const
 {
-    return m["cards"].value<QList<int>>();
+    QList<int> list;
+    QVariantList vlist = m["cards"].toList();
+    for (QVariant var : vlist)
+        list.append(var.toInt());
+    return list;
 }
 
 QDateTime ClientData::getUtc() const

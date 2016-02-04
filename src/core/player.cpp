@@ -159,6 +159,16 @@ void Player::setSelected(bool value)
     selected = value;
 //    emit updated();
 }
+Player::Color Player::getColor() const
+{
+    return color;
+}
+
+void Player::setColor(const Color &value)
+{
+    color = value;
+}
+
 
 
 

@@ -6,7 +6,7 @@
 class ClientData
 {
 public:
-    enum class Type
+    enum Type
     {
         CHAT,
         PHRASE,

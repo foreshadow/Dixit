@@ -13,9 +13,9 @@ class DixitGame : public QObject
     typedef TcpSocket * UniqueId;
 
 public:
-    enum class Status
+    enum Status
     {
-        DIXIT_BEFORE_GAME,
+        DIXIT_BEFORE_GAME = 0,
         DIXIT_IN_GAME_DESCRIBING,
         DIXIT_IN_GAME_PLAYING,
         DIXIT_IN_GAME_SELECTING,
@@ -31,7 +31,9 @@ public:
     QString description() const;
     QString message() const;
     const QList<int> &table() const;
-    const QList<Player> &playerList() const;
+    QList<Player> &playerList();
+    const QList<Player> &constPlayerList() const;
+    Player *currentPlayer();
 
     Player *findPlayer(UniqueId uid);
 

@@ -63,6 +63,7 @@ void CenterArea::clear()
 
 void CenterArea::addCard(Card *card)
 {
+    card->show();
     card->setLocation(Card::Location::CENTER_SELECTABLE);
     list.append(card);
     reposition();
@@ -76,6 +77,7 @@ void CenterArea::reposition()
     {
         c->setPos(x += 100, y);
         c->recordPosition();
+        c->update();
     }
     update();
 }

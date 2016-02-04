@@ -38,7 +38,8 @@ protected:
     HandCards hcards;
     QString myId;
     QList<QGraphicsPixmapItem *> rabbits;
-    QList<Player *> players;
+//    QList<Player *> players;
+    DixitGame *dixitGame;
 
     CenterArea *ca;
     GraphicsButton *gbReady;
@@ -52,6 +53,10 @@ public slots:
     void chatFormSend(QString message);
     void onGBReadyClicked();
     void playCard(int id);
+    void statusChanged();
+    void descriptionChanged();
+    void tableUpdated();
+    void playerListChanged();
 };
 
 #endif // MAINWINDOW_H

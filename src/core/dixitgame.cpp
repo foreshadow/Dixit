@@ -1,6 +1,6 @@
 #include "dixitgame.h"
 
-DixitGame::DixitGame()
+DixitGame::DixitGame() : p()
 {
 
 }
@@ -40,9 +40,22 @@ const QList<int> &DixitGame::table() const
     return t;
 }
 
-const QList<Player> &DixitGame::playerList() const
+QList<Player> &DixitGame::playerList()
 {
     return p;
+}
+
+const QList<Player> &DixitGame::constPlayerList() const
+{
+    return p;
+}
+
+Player *DixitGame::currentPlayer()
+{
+    for (Player &player : p)
+        if (player.getActive())
+            return &player;
+    return nullptr;
 }
 
 Player *DixitGame::findPlayer(DixitGame::UniqueId uid)
@@ -100,19 +113,23 @@ void DixitGame::update(const DixitGame &dixitGame)
         setDescription(dixitGame.description());
     if (dixitGame.table() != table())
         setTable(dixitGame.table());
-    if (dixitGame.playerList().size() != playerList().size())
+    if (dixitGame.constPlayerList().size() != constPlayerList().size())
     {
-        p = dixitGame.playerList();
+        p = dixitGame.constPlayerList();
         emit playerListChanged();
     }
     else
     {
-        for (int i = 0; i < playerList().size(); i++)
-            if (dixitGame.playerList().at(i) != playerList().at(i))
+        bool changed = false;
+        for (int i = 0; i < constPlayerList().size(); i++)
+            if (dixitGame.constPlayerList().at(i) != constPlayerList().at(i))
             {
-                p[i] = dixitGame.playerList().at(i);
+                p[i] = dixitGame.constPlayerList().at(i);
                 emit playerChanged(&p[i]);
+                changed = true;
             }
+        if (changed)
+            emit playerListChanged();
     }
 }
 
@@ -189,14 +206,14 @@ void DixitGame::select(DixitGame::UniqueId uid, int card)
 
 QDataStream &operator <<(QDataStream &ds, const DixitGame &dixitGame)
 {
-    return ds << dixitGame.p << QVariant::fromValue(dixitGame.s) << dixitGame.d << dixitGame.t << dixitGame.m;
+    return ds << dixitGame.p << int(dixitGame.s) << dixitGame.d << dixitGame.t << dixitGame.m;
 }
 
 void operator >>(QDataStream &ds, DixitGame &dixitGame)
 {
     QVariant var;
     ds >> dixitGame.p >> var >> dixitGame.d >> dixitGame.t >> dixitGame.m;
-    dixitGame.s = var.value<DixitGame::Status>();
+    dixitGame.s = DixitGame::Status(var.toInt());
 }
 
 void DixitGame::setMessage(QString message)

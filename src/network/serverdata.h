@@ -2,11 +2,12 @@
 #define SERVERDATA_H
 
 #include <QtCore>
+#include "dixitgame.h"
 
 class ServerData
 {
 public:
-    enum class Type
+    enum Type
     {
         CHAT,
         PHRASE,
@@ -24,8 +25,10 @@ public:
                const QList<int> &cards = QList<int>());
     ServerData(Type t, const QList<int> &cards);
     ServerData(Type t, const QString &fromUser, int card);
+    ServerData(Type t, const DixitGame& dixitGame);
     ~ServerData();
 
+    const DixitGame &getDixitGame() const;
     QVariant getData(const QString &key) const;
     Type getType() const;
     QString getFromUser() const;

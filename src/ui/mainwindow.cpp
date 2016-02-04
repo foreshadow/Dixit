@@ -8,23 +8,38 @@
 #include "serverdata.h"
 #include "card.h"
 
+
+
 MainWindow::MainWindow(TcpSocket *socket, QString id) :
-    ui(new Ui::MainWindow), socket(socket), myId(id), rabbits(), players(),
+    ui(new Ui::MainWindow), socket(socket), myId(id), rabbits(), //players(),
+    dixitGame(new DixitGame),
     ca(new CenterArea(500, 200)), gbReady(new GraphicsButton), headline(new GraphicsHeadline)
 {
     connect(socket, SIGNAL(received(QByteArray)), this, SLOT(received(QByteArray)));
+
     QSplashScreen splash(QPixmap("img/splash.png"));
     splash.show();
+
     splash.showMessage("正在找桌游", Qt::AlignLeft, Qt::white);
+
+    connect(dixitGame, SIGNAL(statusChanged()), this, SLOT(statusChanged()));
+    connect(dixitGame, SIGNAL(descriptionChanged()), this, SLOT(descriptionChanged()));
+    connect(dixitGame, SIGNAL(tableUpdated()), this, SLOT(tableUpdated()));
+    connect(dixitGame, SIGNAL(playerListChanged()), this, SLOT(playerListChanged()));
+
+    splash.showMessage("正在报名参加", Qt::AlignLeft, Qt::white);
+//    sendClientData(ClientData(ClientData::Type::SET_ID, myId, myId));
+
+    splash.showMessage("正在找座位", Qt::AlignLeft, Qt::white);
     ui->setupUi(this);
     ui->graphicsView->setScene(new QGraphicsScene(this));
     ui->graphicsView->setSceneRect(0, 0, 798, 598);
     ui->graphicsView->scene()->addPixmap(QPixmap("img/d.png").scaledToWidth(ui->graphicsView->width()));
-    for (int i = 0; i < 84; i++)
+    for (int i = 1; i <= 84; i++)
     {
-        splash.showMessage(QString("正在拿出卡牌 (%1 / 84)").arg(i + 1),
+        splash.showMessage(QString("正在拿出卡牌 (%1 / 84)").arg(i),
                            Qt::AlignLeft, Qt::white);
-        Card *c = new Card(i, QString("img/cards/%1.png").arg(i + 1, 2, 10, QChar('0')));
+        Card *c = new Card(i, QString("img/cards/%1.png").arg(i, 2, 10, QChar('0')));
         c->hide();
         ui->graphicsView->scene()->addItem(c);
         deck.addCard(c);
@@ -38,8 +53,6 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
     rabbits.append(new QGraphicsPixmapItem(QPixmap("img/rabbit/white.png" ).scaledToHeight(120)));
     for (int i = 0; i < 6; i++)
     {
-        static const QPoint p[] = {{0, 0}, {300, 0}, {600, 0}, {0, 200}, {600, 200}, {0, 400}};
-        rabbits[i]->setPos(p[i]);
         rabbits[i]->hide();
         ui->graphicsView->scene()->addItem(rabbits[i]);
     }
@@ -64,6 +77,8 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
     connect(ca, SIGNAL(cardDrop(int)), this, SLOT(playCard(int)));
     ca->setPos(150, 175);
     ui->graphicsView->scene()->addItem(ca);
+
+    sendClientData(ClientData(ClientData::Type::SYNC, myId));
 }
 
 MainWindow::~MainWindow()
@@ -74,12 +89,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::sync(ServerData sd)
 {
-    if (sd.getContent() == "DESC" && sd.getFromUser() == myId)
+    if (sd.getContent() == "GAME")
+    {
+        dixitGame->update(sd.getDixitGame());
+    }
+    // compatible with old versions
+    else if (sd.getContent() == "DESC" && sd.getFromUser() == myId)
     {
         bool ok = false;
         QString input;
         while (ok == false || input.isEmpty())
-            input = QInputDialog::getText(this, "描述一张卡牌...", "你的描述",
+            input = QInputDialog::getText(this, "你的回合", "描述一张卡牌",
                                           QLineEdit::Normal, "", &ok);
         sendClientData(ClientData(ClientData::Type::DESC, myId, input));
     }
@@ -101,8 +121,8 @@ void MainWindow::handle(ServerData sd)
     case ServerData::Type::READY:
 //        if (sd.getFromUser() == myId)
 //            gbReady->hide();
-        rabbits.at(players.size())->show();
-        players.append(new Player(sd.getFromUser(), nullptr));
+//        rabbits.at(players.size())->show();
+//        players.append(new Player(sd.getFromUser(), nullptr));
         emit chatFormAppend(sd.getFromUser() + "准备就绪。");
         break;
     case ServerData::Type::DESC:
@@ -157,4 +177,80 @@ void MainWindow::playCard(int id)
 {
     if (deck.getCard(id)->getLocation() == Card::Location::HAND_DRAGGABLE)
         sendClientData(ClientData(ClientData::Type::PLAY, myId, "", QList<int>({id})));
+}
+
+void MainWindow::statusChanged()
+{
+    switch (dixitGame->status())
+    {
+    case DixitGame::Status::DIXIT_BEFORE_GAME:
+        setWindowTitle("Dixit - 准备开始");
+        break;
+    case DixitGame::Status::DIXIT_IN_GAME_DESCRIBING:
+        setWindowTitle("Dixit - 描述卡牌中");
+        break;
+    case DixitGame::Status::DIXIT_IN_GAME_PLAYING:
+        setWindowTitle("Dixit - 出牌中");
+        break;
+    case DixitGame::Status::DIXIT_IN_GAME_SELECTING:
+        setWindowTitle("Dixit - 选择中");
+        break;
+    case DixitGame::Status::DIXIT_IN_GAME_SETTLING:
+        setWindowTitle("Dixit - 结算中");
+        break;
+    }
+}
+
+void MainWindow::descriptionChanged()
+{
+    headline->setText(dixitGame->description());
+}
+
+void MainWindow::tableUpdated()
+{
+    ca->clear();
+    for (int i : dixitGame->table())
+        ca->addCard(deck.getCard(i));
+}
+
+void MainWindow::playerListChanged()
+{
+    int self;
+    for (int i = 0; i < dixitGame->constPlayerList().size(); i++)
+        if (dixitGame->constPlayerList().at(i).getId() == myId)
+            self = i;
+    static const Player::Color c[] =
+    {
+        Player::Color::Green,
+        Player::Color::Blue,
+        Player::Color::Black,
+        Player::Color::Pink,
+        Player::Color::Yellow,
+        Player::Color::White
+    };
+    static const QPoint p[] =
+    {
+        {   0,   0 },
+        { 300,   0 },
+        { 650,   0 },
+        {   0, 200 },
+        { 650, 200 },
+        {   0, 400 }
+    };
+    auto getIndexInPoints = [&](Player::Color color)
+    {
+        for (int i = 0; i < 6; i++)
+            if (c[i] == color)
+                return i;
+        return -1;
+    };
+    int cpDiff = getIndexInPoints(dixitGame->constPlayerList().at(self).getColor()) - 5;
+    for (int i = 0; i < 6; i++)
+        rabbits[i]->hide();
+    for (int i = 0; i < dixitGame->constPlayerList().size(); i++)
+    {
+        int k = getIndexInPoints(dixitGame->constPlayerList().at(i).getColor());
+        rabbits[k]->show();
+        rabbits[k]->setPos(p[(k - cpDiff + 6) % 6]);
+    }
 }
