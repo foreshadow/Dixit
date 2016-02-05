@@ -53,6 +53,7 @@ public slots:
     void chatFormSend(QString message);
     void onGBReadyClicked();
     void playCard(int id);
+    void selected();
     void statusChanged();
     void descriptionChanged();
     void tableUpdated();

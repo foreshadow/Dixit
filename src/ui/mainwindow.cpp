@@ -4,6 +4,7 @@
 #include "chatform.h"
 #include <QSplashScreen>
 #include <QInputDialog>
+#include <QObject>
 #include "clientdata.h"
 #include "serverdata.h"
 #include "card.h"
@@ -40,6 +41,7 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
         splash.showMessage(QString("正在拿出卡牌 (%1 / 84)").arg(i),
                            Qt::AlignLeft, Qt::white);
         Card *c = new Card(i, QString("img/cards/%1.png").arg(i, 2, 10, QChar('0')));
+        connect(c, SIGNAL(doubleClicked()), this, SLOT(selected()));
         c->hide();
         ui->graphicsView->scene()->addItem(c);
         deck.addCard(c);
@@ -177,6 +179,13 @@ void MainWindow::playCard(int id)
 {
     if (deck.getCard(id)->getLocation() == Card::Location::HAND_DRAGGABLE)
         sendClientData(ClientData(ClientData::Type::PLAY, myId, "", QList<int>({id})));
+}
+
+void MainWindow::selected()
+{
+    int id = qobject_cast<Card *>(sender())->getId();
+    if (dixitGame->status() == DixitGame::Status::DIXIT_IN_GAME_SELECTING)
+        sendClientData(ClientData(ClientData::Type::SELECT, myId, id));
 }
 
 void MainWindow::statusChanged()

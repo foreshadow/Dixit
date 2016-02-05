@@ -84,6 +84,11 @@ void Card::mouseReleaseEvent(QGraphicsSceneMouseEvent *)
 
 }
 
+void Card::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *)
+{
+    emit doubleClicked();
+}
+
 void Card::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
     if (img->rect().contains(event->pos().toPoint()) == false)

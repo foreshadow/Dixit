@@ -5,10 +5,13 @@
 #include <QGraphicsItem>
 #include <QPainter>
 
-class Card : public QGraphicsItem
+class Card : public QObject, public QGraphicsItem
 {
+    Q_OBJECT
+    Q_INTERFACES(QGraphicsItem)
+
 public:
-    explicit Card(int id, QString path);
+    Card(int id, QString path);
     ~Card();
 
     QRectF boundingRect() const;
@@ -16,6 +19,7 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent *);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *);
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *);
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *);
 
@@ -41,6 +45,9 @@ protected:
     QImage origin;
     QImage abbr;
     QImage *img;
+
+signals:
+    void doubleClicked();
 };
 
 #endif // CARD_H
