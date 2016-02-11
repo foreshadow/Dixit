@@ -29,6 +29,7 @@ QRectF Card::boundingRect() const
 
 void Card::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
+    painter->drawText(0, img->height(), QString::number(id));
     painter->setRenderHint(QPainter::Antialiasing);
     painter->drawPixmap(img->rect(), QPixmap::fromImage(*img));
 

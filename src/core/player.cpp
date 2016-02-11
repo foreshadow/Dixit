@@ -1,13 +1,15 @@
 #include "player.h"
 
-Player::Player()
+Player::Player() :
+    seat(0), color(Player::Color::Unknown), id(), ready(false), score(0),
+    socket(nullptr), handCards(), active(false), played(false), selected(false)
 {
 
 }
 
 Player::Player(QString id, TcpSocket *socket) :
-    id(id),
-    socket(socket)
+    seat(0), color(Player::Color::Unknown), id(id), ready(false), score(0),
+    socket(socket), handCards(), active(false), played(false), selected(false)
 {
 
 }
@@ -21,6 +23,7 @@ void Player::operator =(const Player &p)
 {
     socket = p.socket;
     seat = p.seat;
+    color = p.color;
     id = p.id;
     ready = p.ready;
     score = p.score;
@@ -34,6 +37,7 @@ bool Player::operator ==(const Player &p) const
 {
     return socket == p.socket
            && seat == p.seat
+           && color == p.color
            && id == p.id
            && ready == p.ready
            && score == p.score
@@ -50,16 +54,18 @@ bool Player::operator !=(const Player &p) const
 
 QDataStream &operator <<(QDataStream &ds, const Player &p)
 {
-    return ds << (int)p.socket << p.seat << p.id << p.ready << p.score << p.handCards
-              << p.active << p.played << p.selected;
+    return ds << (int)p.socket << p.seat << (int)p.color << p.id << p.ready << p.score
+              << p.handCards << p.active << p.played << p.selected;
 }
 
 void operator >>(QDataStream &ds, Player &p)
 {
     int pSocket;
-    ds >> pSocket >> p.seat >> p.id >> p.ready >> p.score >> p.handCards
-            >> p.active >> p.played >> p.selected;
+    int eColor;
+    ds >> pSocket >> p.seat >> eColor >> p.id >> p.ready >> p.score
+       >> p.handCards >> p.active >> p.played >> p.selected;
     p.socket = (TcpSocket *)(pSocket);
+    p.color = (Player::Color)(eColor);
 }
 
 int Player::getSeat() const

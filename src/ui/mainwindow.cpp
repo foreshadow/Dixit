@@ -12,7 +12,8 @@
 
 
 MainWindow::MainWindow(TcpSocket *socket, QString id) :
-    ui(new Ui::MainWindow), socket(socket), myId(id), rabbits(), //players(),
+    ui(new Ui::MainWindow), cf(/* not yet */), socket(socket),
+    myId(id), rabbits(), bar1(), bar2(), ids(), scores(), //players(),
     dixitGame(new DixitGame),
     ca(new CenterArea(500, 200)), gbReady(new GraphicsButton), headline(new GraphicsHeadline)
 {
@@ -55,13 +56,36 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
     rabbits.append(new QGraphicsPixmapItem(QPixmap("img/rabbit/white.png" ).scaledToHeight(120)));
     for (int i = 0; i < 6; i++)
     {
+        bar1.append(new QGraphicsPixmapItem(QPixmap("img/barl.png").scaled(135, 36)));
+        bar2.append(new QGraphicsPixmapItem(QPixmap("img/bars.png").scaled(100, 36).copy(25, 0, 75, 36)));
+    }
+    for (int i = 0; i < 6; i++)
+    {
+        bar1[i]->setOpacity(0.9);
+        bar2[i]->setOpacity(0.9);
+        ids.append(new QGraphicsTextItem);
+        ids[i]->setFont(QFont("微软雅黑", 12));
+        ids[i]->setDefaultTextColor(Qt::white);
+        scores.append(new QGraphicsTextItem);
+        scores[i]->setFont(QFont("微软雅黑", 12));
+        scores[i]->setDefaultTextColor(Qt::white);
+    }
+    for (int i = 0; i < 6; i++)
+    {
         rabbits[i]->hide();
+        bar1[i]->hide();
+        bar2[i]->hide();
+        ids[i]->hide();
+        scores[i]->hide();
         ui->graphicsView->scene()->addItem(rabbits[i]);
+        ui->graphicsView->scene()->addItem(bar1[i]);
+        ui->graphicsView->scene()->addItem(bar2[i]);
+        ui->graphicsView->scene()->addItem(ids[i]);
+        ui->graphicsView->scene()->addItem(scores[i]);
     }
     splash.showMessage("正在准备茶水", Qt::AlignLeft, Qt::white);
-    ChatForm *cf = new ChatForm(myId, this);
+    cf = new ChatForm(myId, this);
     connect(cf, SIGNAL(send(QString)), this, SLOT(chatFormSend(QString)));
-    connect(this, SIGNAL(chatFormAppend(QString)), cf, SLOT(append(QString)));
     cf->setFeatures(QDockWidget::DockWidgetFloatable);
     QPoint mtg = mapToGlobal(this->geometry().topLeft());
     cf->setGeometry(mtg.x() + this->width() - cf->width(), mtg.y(), cf->width(), cf->height());
@@ -94,17 +118,38 @@ void MainWindow::sync(ServerData sd)
     if (sd.getContent() == "GAME")
     {
         dixitGame->update(sd.getDixitGame());
+        playerListChanged();
     }
     // compatible with old versions
-    else if (sd.getContent() == "DESC" && sd.getFromUser() == myId)
+    else if (sd.getContent() == "DESC")
     {
-        bool ok = false;
-        QString input;
-        while (ok == false || input.isEmpty())
-            input = QInputDialog::getText(this, "你的回合", "描述一张卡牌",
-                                          QLineEdit::Normal, "", &ok);
-        sendClientData(ClientData(ClientData::Type::DESC, myId, input));
+        dixitGame->setStatus(DixitGame::Status::DIXIT_IN_GAME_DESCRIBING);
+        if(sd.getFromUser() == myId)
+        {
+            bool ok = false;
+            QString input;
+            while (ok == false || input.isEmpty())
+                input = QInputDialog::getText(this, "你的回合", "描述一张卡牌",
+                                              QLineEdit::Normal, "", &ok);
+            sendClientData(ClientData(ClientData::Type::DESC, myId, input));
+        }
     }
+    else if (sd.getContent() == "PLAY")
+        dixitGame->setStatus(DixitGame::Status::DIXIT_IN_GAME_PLAYING);
+    else if (sd.getContent() == "SELECT")
+        dixitGame->setStatus(DixitGame::Status::DIXIT_IN_GAME_SELECTING);
+    else if (sd.getContent() == "SETTLE")
+        dixitGame->setStatus(DixitGame::Status::DIXIT_IN_GAME_SETTLING);
+}
+
+void MainWindow::chatFormAppend(QString msg)
+{
+    cf->appendc(msg);
+}
+
+void MainWindow::systemMessage(QString msg)
+{
+    cf->appendc(msg, Qt::blue);
 }
 
 void MainWindow::handle(ServerData sd)
@@ -113,22 +158,27 @@ void MainWindow::handle(ServerData sd)
     {
     case ServerData::Type::CHAT:
     case ServerData::Type::PHRASE:
-        emit chatFormAppend(QString("%1 %2\n  %3")
-                            .arg(sd.getFromUser())
-                            .arg(sd.getUtc().toLocalTime().toString("hh:mm:ss"))
-                            .arg(sd.getContent()));
+        if (sd.getFromUser() == "SERVER")
+            emit systemMessage(sd.getContent());
+        else
+            emit chatFormAppend(QString("%1 %2\n  %3")
+                                .arg(sd.getFromUser())
+                                .arg(sd.getUtc().toLocalTime().toString("hh:mm:ss"))
+                                .arg(sd.getContent()));
         break;
     case ServerData::Type::REQUEST_ID:
         break;
     case ServerData::Type::READY:
-//        if (sd.getFromUser() == myId)
-//            gbReady->hide();
+        if (sd.getFromUser() == myId)
+            gbReady->hide();
+        sendClientData(ClientData(ClientData::Type::SYNC, myId));
+//        playerListChanged(); // oops
 //        rabbits.at(players.size())->show();
 //        players.append(new Player(sd.getFromUser(), nullptr));
-        emit chatFormAppend(sd.getFromUser() + "准备就绪。");
+        emit systemMessage(sd.getFromUser() + "准备就绪。");
         break;
     case ServerData::Type::DESC:
-        emit chatFormAppend(QString("%1的描述为\n  %2").arg(sd.getFromUser()).arg(sd.getContent()));
+        emit systemMessage(QString("%1的描述为\n  %2").arg(sd.getFromUser()).arg(sd.getContent()));
         headline->setText(sd.getContent());
         update();
         break;
@@ -137,8 +187,14 @@ void MainWindow::handle(ServerData sd)
             ca->addCard(hcards.takeCard(sd.getCards().first()));
         else
             ca->addCard(deck.getCard(sd.getCards().first()));
+        for (Player p : dixitGame->playerList())
+            if (p.getId() == sd.getFromUser())
+                p.setPlayed();
         break;
     case ServerData::Type::SELECT:
+        for (Player p : dixitGame->playerList())
+            if (p.getId() == sd.getFromUser())
+                p.setSelected();
         break;
     case ServerData::Type::DRAW:
         for (int i = 0; i < sd.getCards().size(); i++)
@@ -149,6 +205,7 @@ void MainWindow::handle(ServerData sd)
         sync(sd);
         break;
     }
+    playerListChanged();
 }
 
 void MainWindow::received(QByteArray message)
@@ -178,14 +235,16 @@ void MainWindow::onGBReadyClicked()
 void MainWindow::playCard(int id)
 {
     if (deck.getCard(id)->getLocation() == Card::Location::HAND_DRAGGABLE)
-        sendClientData(ClientData(ClientData::Type::PLAY, myId, "", QList<int>({id})));
+        sendClientData(ClientData(ClientData::Type::PLAY, myId, id));
 }
 
 void MainWindow::selected()
 {
+    if (dixitGame->status() != DixitGame::Status::DIXIT_IN_GAME_SELECTING)
+        return;
     int id = qobject_cast<Card *>(sender())->getId();
-    if (dixitGame->status() == DixitGame::Status::DIXIT_IN_GAME_SELECTING)
-        sendClientData(ClientData(ClientData::Type::SELECT, myId, id));
+    sendClientData(ClientData(ClientData::Type::SELECT, myId, id));
+//    chatFormAppend(QString("Selected card %1").arg(id));
 }
 
 void MainWindow::statusChanged()
@@ -224,10 +283,20 @@ void MainWindow::tableUpdated()
 
 void MainWindow::playerListChanged()
 {
-    int self;
+    // to do
+//    if (dixitGame->status() == DixitGame::Status::DIXIT_BEFORE_GAME)
+//        return;
+
+
+//    systemMessage("Updating players...");
+//    systemMessage(QString("Size: %1").arg(dixitGame->constPlayerList().size()));
+    int self = -1;
     for (int i = 0; i < dixitGame->constPlayerList().size(); i++)
         if (dixitGame->constPlayerList().at(i).getId() == myId)
             self = i;
+    if (self == -1)
+        return;
+
     static const Player::Color c[] =
     {
         Player::Color::Green,
@@ -241,25 +310,51 @@ void MainWindow::playerListChanged()
     {
         {   0,   0 },
         { 300,   0 },
-        { 650,   0 },
+        { 600,   0 },
         {   0, 200 },
-        { 650, 200 },
-        {   0, 400 }
+        { 600, 200 },
+        {   0, 400 },
     };
     auto getIndexInPoints = [&](Player::Color color)
     {
         for (int i = 0; i < 6; i++)
             if (c[i] == color)
                 return i;
+        Q_ASSERT_X(false, "replacing rabbits", "undefined color");
         return -1;
     };
     int cpDiff = getIndexInPoints(dixitGame->constPlayerList().at(self).getColor()) - 5;
     for (int i = 0; i < 6; i++)
+    {
         rabbits[i]->hide();
+        bar1[i]->hide();
+        bar2[i]->hide();
+        ids[i]->hide();
+        scores[i]->hide();
+    }
     for (int i = 0; i < dixitGame->constPlayerList().size(); i++)
     {
-        int k = getIndexInPoints(dixitGame->constPlayerList().at(i).getColor());
+        const Player *pp = &dixitGame->constPlayerList().at(i);
+        int k = getIndexInPoints(pp->getColor());
+        QPoint pos = p[(k - cpDiff + 6) % 6];
+        rabbits[k]->setPos(pos);
         rabbits[k]->show();
-        rabbits[k]->setPos(p[(k - cpDiff + 6) % 6]);
+        bar1[k]->setPos(pos + QPoint(0, //rabbits[k]->boundingRect().width(),
+                                     rabbits[k]->boundingRect().height() * 3 / 10 - bar1[k]->boundingRect().height() / 2));
+        bar1[k]->show();
+        bar2[k]->setPos(pos + QPoint(0, //rabbits[k]->boundingRect().width(),
+                                     rabbits[k]->boundingRect().height() * 7 / 10 - bar2[k]->boundingRect().height() / 2));
+        bar2[k]->show();
+        ids[k]->setPlainText(pp->getId()
+                             + (pp->getActive() ? " ★" : "")
+                             + (pp->getPlayed() ? " ▲" : "")
+                             + (pp->getSelected() ? " ●" : ""));
+        ids[k]->setPos(pos + QPoint(5, //rabbits[k]->boundingRect().width() + 5,
+                                    rabbits[k]->boundingRect().height() * 3 / 10 - ids[k]->boundingRect().height() / 2));
+        ids[k]->show();
+        scores[k]->setPlainText(QString("×%1").arg(pp->getScore()));
+        scores[k]->setPos(pos + QPoint(5, //rabbits[k]->boundingRect().width() + 5,
+                                       rabbits[k]->boundingRect().height() * 7 / 10 - scores[k]->boundingRect().height() / 2));
+        scores[k]->show();
     }
 }

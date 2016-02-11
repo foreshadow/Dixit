@@ -7,6 +7,7 @@
 #include "tcpsocket.h"
 #include "player.h"
 #include "deck.h"
+#include "chatform.h"
 #include "handcards.h"
 #include "centerarea.h"
 #include "clientdata.h"
@@ -29,8 +30,10 @@ public:
 
     void sendClientData(ClientData cd);
     void sync(ServerData sd);
+
 private:
     Ui::MainWindow *ui;
+    ChatForm *cf;
     TcpSocket *socket;
 
 protected:
@@ -38,6 +41,10 @@ protected:
     HandCards hcards;
     QString myId;
     QList<QGraphicsPixmapItem *> rabbits;
+    QList<QGraphicsPixmapItem *> bar1;
+    QList<QGraphicsPixmapItem *> bar2;
+    QList<QGraphicsTextItem *> ids;
+    QList<QGraphicsTextItem *> scores;
 //    QList<Player *> players;
     DixitGame *dixitGame;
 
@@ -45,10 +52,10 @@ protected:
     GraphicsButton *gbReady;
     GraphicsHeadline *headline;
 
-signals:
-    void chatFormAppend(QString);
 
 public slots:
+    void chatFormAppend(QString msg);
+    void systemMessage(QString msg);
     void received(QByteArray message);
     void chatFormSend(QString message);
     void onGBReadyClicked();

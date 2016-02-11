@@ -1,11 +1,13 @@
 #include "dixitgame.h"
 
-DixitGame::DixitGame() : p()
+DixitGame::DixitGame() :
+    p(), s(DixitGame::Status::DIXIT_BEFORE_GAME)
 {
 
 }
 
-DixitGame::DixitGame(const QList<Player> &playerlist) : p(playerlist)
+DixitGame::DixitGame(const QList<Player> &playerlist) :
+    p(playerlist), s(DixitGame::Status::DIXIT_BEFORE_GAME)
 {
 
 }

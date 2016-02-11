@@ -10,12 +10,13 @@ class Player //: public QObject
 public:
     enum class Color
     {
+        Unknown = 0,
         Black,
         Blue,
         Green,
         White,
         Yellow,
-        Pink
+        Pink,
     };
 
     Player();

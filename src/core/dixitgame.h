@@ -15,7 +15,7 @@ class DixitGame : public QObject
 public:
     enum Status
     {
-        DIXIT_BEFORE_GAME = 0,
+        DIXIT_BEFORE_GAME,
         DIXIT_IN_GAME_DESCRIBING,
         DIXIT_IN_GAME_PLAYING,
         DIXIT_IN_GAME_SELECTING,

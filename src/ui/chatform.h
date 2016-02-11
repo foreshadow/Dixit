@@ -15,6 +15,8 @@ public:
     explicit ChatForm(QString myId, QWidget *parent = 0);
     ~ChatForm();
 
+    void appendc(QString msg, QColor color = Qt::black);
+
 private slots:
     void on_lineEdit_returnPressed();
     void on_pushButton_clicked();
@@ -29,7 +31,8 @@ signals:
     void send(QString);
 
 public slots:
-    void append(QString message);
+//    void append(QString message);
+//    void appendSys(QString message);
 };
 
 #endif // CHATFORM_H
