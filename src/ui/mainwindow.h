@@ -26,14 +26,15 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(TcpSocket *socket, QString id);
     ~MainWindow();
-    void handle(ServerData cd);
 
+    void resizeEvent(QResizeEvent *event);
+
+    void handle(ServerData cd);
     void sendClientData(ClientData cd);
     void sync(ServerData sd);
 
 private:
     Ui::MainWindow *ui;
-    ChatForm *cf;
     TcpSocket *socket;
 
 protected:
@@ -51,7 +52,7 @@ protected:
     CenterArea *ca;
     GraphicsButton *gbReady;
     GraphicsHeadline *headline;
-
+    QRectF pRect;
 
 public slots:
     void chatFormAppend(QString msg);

@@ -1,10 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "chatform.h"
 #include <QSplashScreen>
 #include <QInputDialog>
 #include <QObject>
+#include <QResizeEvent>
+
+#include "chatform.h"
 #include "clientdata.h"
 #include "serverdata.h"
 #include "card.h"
@@ -12,31 +14,31 @@
 
 
 MainWindow::MainWindow(TcpSocket *socket, QString id) :
-    ui(new Ui::MainWindow), cf(/* not yet */), socket(socket),
+    ui(new Ui::MainWindow), socket(socket),
     myId(id), rabbits(), bar1(), bar2(), ids(), scores(), //players(),
     dixitGame(new DixitGame),
     ca(new CenterArea(500, 200)), gbReady(new GraphicsButton), headline(new GraphicsHeadline)
 {
-    connect(socket, SIGNAL(received(QByteArray)), this, SLOT(received(QByteArray)));
 
     QSplashScreen splash(QPixmap("img/splash.png"));
     splash.show();
 
     splash.showMessage("正在找桌游", Qt::AlignLeft, Qt::white);
-
+    connect(socket, SIGNAL(received(QByteArray)), this, SLOT(received(QByteArray)));
     connect(dixitGame, SIGNAL(statusChanged()), this, SLOT(statusChanged()));
     connect(dixitGame, SIGNAL(descriptionChanged()), this, SLOT(descriptionChanged()));
     connect(dixitGame, SIGNAL(tableUpdated()), this, SLOT(tableUpdated()));
     connect(dixitGame, SIGNAL(playerListChanged()), this, SLOT(playerListChanged()));
 
-    splash.showMessage("正在报名参加", Qt::AlignLeft, Qt::white);
+//    splash.showMessage("正在报名参加", Qt::AlignLeft, Qt::white);
 //    sendClientData(ClientData(ClientData::Type::SET_ID, myId, myId));
 
     splash.showMessage("正在找座位", Qt::AlignLeft, Qt::white);
     ui->setupUi(this);
     ui->graphicsView->setScene(new QGraphicsScene(this));
-    ui->graphicsView->setSceneRect(0, 0, 798, 598);
-    ui->graphicsView->scene()->addPixmap(QPixmap("img/d.png").scaledToWidth(ui->graphicsView->width()));
+    ui->graphicsView->setSceneRect(0, 0, 800, 600);
+    pRect = QRectF(0, 0, 800, 600);
+    ui->graphicsView->scene()->addPixmap(QPixmap("img/d.png").scaledToWidth(800));
     for (int i = 1; i <= 84; i++)
     {
         splash.showMessage(QString("正在拿出卡牌 (%1 / 84)").arg(i),
@@ -84,11 +86,7 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
         ui->graphicsView->scene()->addItem(scores[i]);
     }
     splash.showMessage("正在准备茶水", Qt::AlignLeft, Qt::white);
-    cf = new ChatForm(myId, this);
-    connect(cf, SIGNAL(send(QString)), this, SLOT(chatFormSend(QString)));
-    cf->setFeatures(QDockWidget::DockWidgetFloatable);
-    QPoint mtg = mapToGlobal(this->geometry().topLeft());
-    cf->setGeometry(mtg.x() + this->width() - cf->width(), mtg.y(), cf->width(), cf->height());
+    connect(ui->widget, SIGNAL(send(QString)), this, SLOT(chatFormSend(QString)));
     splash.showMessage("正在说你好", Qt::AlignLeft, Qt::white);
     sendClientData(ClientData(ClientData::Type::SET_ID, myId, myId));
     sendClientData(ClientData(ClientData::Type::CHAT, myId, myId + "加入了房间。"));
@@ -109,8 +107,26 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
 
 MainWindow::~MainWindow()
 {
-    deck.clear();
+    // delete a lot, to do
     delete ui;
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    if (event->size().width() - event->size().height() * 4 / 3 < 200)
+    {
+        resizeEvent(new QResizeEvent(QSize(event->size().height() * 4 / 3 + 200, event->size().height()), event->oldSize()));
+        return;
+    }
+    resize(event->size());
+    ui->graphicsView->resize(event->size().height() * 4 / 3, event->size().height());
+    ui->widget->setGeometry(ui->graphicsView->width(), 0,
+                            event->size().width() - ui->graphicsView->width(),
+                            event->size().height());
+    ui->graphicsView->scale(ui->graphicsView->width() / pRect.width(),
+                            ui->graphicsView->height() / pRect.height());
+    pRect = QRectF(0, 0, ui->graphicsView->width(), ui->graphicsView->height());
+    repaint();
 }
 
 void MainWindow::sync(ServerData sd)
@@ -144,12 +160,12 @@ void MainWindow::sync(ServerData sd)
 
 void MainWindow::chatFormAppend(QString msg)
 {
-    cf->appendc(msg);
+    ui->widget->appendc(msg);
 }
 
 void MainWindow::systemMessage(QString msg)
 {
-    cf->appendc(msg, Qt::blue);
+    ui->widget->appendc(msg, Qt::blue);
 }
 
 void MainWindow::handle(ServerData sd)
@@ -172,9 +188,6 @@ void MainWindow::handle(ServerData sd)
         if (sd.getFromUser() == myId)
             gbReady->hide();
         sendClientData(ClientData(ClientData::Type::SYNC, myId));
-//        playerListChanged(); // oops
-//        rabbits.at(players.size())->show();
-//        players.append(new Player(sd.getFromUser(), nullptr));
         emit systemMessage(sd.getFromUser() + "准备就绪。");
         break;
     case ServerData::Type::DESC:
@@ -308,11 +321,11 @@ void MainWindow::playerListChanged()
     };
     static const QPoint p[] =
     {
-        {   0,   0 },
-        { 300,   0 },
-        { 600,   0 },
-        {   0, 200 },
         { 600, 200 },
+        { 600,   0 },
+        { 300,   0 },
+        {   0,   0 },
+        {   0, 200 },
         {   0, 400 },
     };
     auto getIndexInPoints = [&](Player::Color color)
@@ -358,3 +371,4 @@ void MainWindow::playerListChanged()
         scores[k]->show();
     }
 }
+

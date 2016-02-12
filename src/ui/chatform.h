@@ -7,13 +7,17 @@ namespace Ui {
 class ChatForm;
 }
 
-class ChatForm : public QDockWidget
+class ChatForm : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ChatForm(QString myId, QWidget *parent = 0);
+    explicit ChatForm(QWidget *parent = 0, QString myId = QString());
     ~ChatForm();
+
+    void resizeEvent(QResizeEvent *);
+
+    void setId(const QString &id);
 
     void appendc(QString msg, QColor color = Qt::black);
 

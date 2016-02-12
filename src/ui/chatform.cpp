@@ -3,8 +3,8 @@
 
 #include <QTime>
 
-ChatForm::ChatForm(QString myId, QWidget *parent) :
-    QDockWidget(parent),
+ChatForm::ChatForm(QWidget *parent, QString myId) :
+    QWidget(parent),
     ui(new Ui::ChatForm),
     myId(myId)
 {
@@ -14,6 +14,16 @@ ChatForm::ChatForm(QString myId, QWidget *parent) :
 ChatForm::~ChatForm()
 {
     delete ui;
+}
+
+void ChatForm::resizeEvent(QResizeEvent *)
+{
+    int i = 1;
+}
+
+void ChatForm::setId(const QString &id)
+{
+    myId = id;
 }
 
 void ChatForm::appendc(QString msg, QColor color)
