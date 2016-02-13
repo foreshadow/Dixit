@@ -16,11 +16,6 @@ ChatForm::~ChatForm()
     delete ui;
 }
 
-void ChatForm::resizeEvent(QResizeEvent *)
-{
-    int i = 1;
-}
-
 void ChatForm::setId(const QString &id)
 {
     myId = id;

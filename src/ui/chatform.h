@@ -15,8 +15,6 @@ public:
     explicit ChatForm(QWidget *parent = 0, QString myId = QString());
     ~ChatForm();
 
-    void resizeEvent(QResizeEvent *);
-
     void setId(const QString &id);
 
     void appendc(QString msg, QColor color = Qt::black);

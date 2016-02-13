@@ -34,7 +34,8 @@ SOURCES += \
     src/ui/logindialog.cpp \
     src/ui/mainwindow.cpp \
     src/core/centerarea.cpp \
-    src/core/dixitgame.cpp
+    src/core/dixitgame.cpp \
+    src/graphics/graphicscountdown.cpp
 
 HEADERS  += \
     src/core/card.h \
@@ -50,7 +51,8 @@ HEADERS  += \
     src/ui/logindialog.h \
     src/ui/mainwindow.h \
     src/core/centerarea.h \
-    src/core/dixitgame.h
+    src/core/dixitgame.h \
+    src/graphics/graphicscountdown.h
 
 FORMS    += \
     src/ui/chatform.ui \

@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QResizeEvent>
 
+#include "graphicscountdown.h"
 #include "chatform.h"
 #include "clientdata.h"
 #include "serverdata.h"
@@ -103,6 +104,8 @@ MainWindow::MainWindow(TcpSocket *socket, QString id) :
     ui->graphicsView->scene()->addItem(ca);
 
     sendClientData(ClientData(ClientData::Type::SYNC, myId));
+
+    ui->graphicsView->scene()->addItem(new GraphicsCountdownTemplate(30));
 }
 
 MainWindow::~MainWindow()
